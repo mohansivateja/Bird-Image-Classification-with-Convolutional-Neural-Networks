@@ -1,0 +1,25 @@
+import streamlit as st
+import tensorflow as tf
+import numpy as np
+import cv2
+
+model = tf.keras.models.load_model("bird_species_classifier.h5")
+classes = ["American Goldfinch", "Barn Owl", "Carmine Bee-eater", 
+           "Downy Woodpecker", "Emperor Penguin", "Flamingo"]
+
+st.title("🐦 Bird Species Classifier")
+uploaded_file = st.file_uploader("Upload an image", type=["jpg", "png"])
+
+if uploaded_file:
+    file_bytes = np.asarray(bytearray(uploaded_file.read()), dtype=np.uint8)
+    img = cv2.imdecode(file_bytes, 1)
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    img = cv2.resize(img, (224, 224)) / 255.0
+
+    st.image(img, caption="Uploaded Image", use_column_width=True)
+
+    img_array = np.expand_dims(img, axis=0)
+    prediction = model.predict(img_array)
+    predicted_class = classes[np.argmax(prediction)]
+
+    st.write(f"### Prediction: {predicted_class}")
